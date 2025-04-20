@@ -1,0 +1,21 @@
+﻿@page
+@model ConfirmEmailModel
+
+@{
+    ViewData["Title"] = "Подтверждение почты";
+}
+
+
+<h1 class="font-bold text-3xl text-center">Подтверждение почты</h1>
+<div class="flex justify-center mt-6">
+
+    <div class="row w-full max-w-md bg-white shadow-md rounded-lg p-6">
+            <div class="form-floating">
+            <partial name="_StatusMessage" model="Model.StatusMessage" />
+        </div>
+        <a href="/">
+            <button type="submit" class="bg-zinc-900 text-white py-2 px-8 mt-4 rounded-md w-full">Авторизация</button>
+        </a>
+
+    </div>
+</div>

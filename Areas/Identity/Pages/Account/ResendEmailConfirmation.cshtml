@@ -1,0 +1,25 @@
+﻿@page
+@model ResendEmailConfirmationModel
+@{
+    ViewData["Title"] = "Подтверждение учётной записи";
+}
+
+<h1 class="font-bold text-3xl text-center">Подтверждение учётной записи</h1>
+
+<div class="flex justify-center mt-6">
+
+    <div class="row w-full max-w-md bg-white shadow-md rounded-lg p-6">
+        <form method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-floating">
+                <p class="block text-gray-700 font-medium">Почта:</p>
+                <input asp-for="Input.Email" class="w-full border border-gray-300 mb-2 rounded-md px-4 py-2 mt-1 focus:ring focus:ring-gray-500" aria-required="true" />
+            </div>
+            <button type="submit" class="bg-zinc-900 text-white py-2 px-8 rounded-md w-full mt-3">Отправить</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

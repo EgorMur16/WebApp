@@ -1,0 +1,198 @@
+﻿@page
+@using WebAppAuthorization.Controllers
+@model ImagineModel
+@{
+    ViewData["Title"] = "Locked out";
+}
+
+<div class="max-w-2xl mx-auto p-6 bg-gray-50 rounded-lg shadow-sm border border-gray-200">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Загрузка картинки с обработкой на сервере</h2>
+
+    <!-- Поле для загрузки картинки -->
+    <div class="mb-4">
+        <label for="imageUpload" class="block text-sm font-medium text-gray-700 mb-1">Выберите изображение:</label>
+        <input type="file" id="imageUpload" accept="image/*" class="block w-full text-sm text-gray-500
+            file:mr-4 file:py-2 file:px-4
+            file:rounded-md file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-50 file:text-blue-700
+            hover:file:bg-blue-100" />
+    </div>
+
+    <!-- Блок предпросмотра -->
+    <div id="imagePreviewContainer" class="hidden mb-4">
+        <h4 class="text-lg font-medium text-gray-700 mb-2">Исходное изображение:</h4>
+        <img id="imagePreview" src="#" alt="Предпросмотр изображения" class="max-w-[300px] max-h-[300px] rounded-md shadow-sm" />
+    </div>
+
+    <!-- Текстовое поле -->
+    <div id="textInputContainer" class="hidden mt-5">
+        <div class="mb-4">
+            <label for="userText" class="block text-sm font-medium text-gray-700 mb-1">Введите описание (опционально):</label>
+            <textarea id="userText" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm
+                focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      placeholder="Введите текст..."></textarea>
+        </div>
+        <button id="submitButton" class="inline-flex items-center px-4 py-2 border border-transparent
+            text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Отправить на обработку
+        </button>
+        <div id="loadingIndicator" class="hidden mt-3">
+            <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            <span class="ml-2 text-gray-600">Обработка изображения...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для результата -->
+<div id="resultModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Фон -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+
+        <!-- Контент модального окна -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden
+            shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Результат обработки</h3>
+                        <div class="mt-2">
+                            <img id="processedImage" src="#" alt="Обработанное изображение" class="max-w-full max-h-[70vh] mx-auto" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <a id="downloadResult" href="#" download="processed_image.png"
+                   class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm
+                    px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    Скачать
+                </a>
+                <button type="button" onclick="closeModal()"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300
+                    shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const textInputContainer = document.getElementById('textInputContainer');
+        const userText = document.getElementById('userText');
+        const submitButton = document.getElementById('submitButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultModal = document.getElementById('resultModal');
+        const processedImage = document.getElementById('processedImage');
+        const downloadResult = document.getElementById('downloadResult');
+
+        let base64Image = '';
+
+        // Обработчик загрузки изображения
+        imageUpload.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+
+            if (file && file.type.match('image.*')) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    base64Image = e.target.result.split(',')[1];
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                    textInputContainer.classList.remove('hidden');
+                }
+
+                reader.readAsDataURL(file);
+            } else {
+                imagePreviewContainer.classList.add('hidden');
+                textInputContainer.classList.add('hidden');
+                base64Image = '';
+            }
+        });
+
+        // Обработчик кнопки отправки
+        submitButton.addEventListener('click', function () {
+            if (!base64Image) {
+                alert('Пожалуйста, выберите изображение');
+                return;
+            }
+
+            // Показываем индикатор загрузки
+            submitButton.disabled = true;
+            loadingIndicator.classList.remove('hidden');
+
+            // Подготовка данных для отправки
+            const requestData = {
+                image: base64Image,
+                text: userText.value.trim()
+            };
+
+            // URL вашего API для обработки изображений
+            const apiUrl = 'http://84.21.173.217:20102/upload';
+
+            // Отправка данных на сервер
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка сети');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.processedImage) {
+                        processedImage.src = `data:image/png;base64,${data.processedImage}`;
+                        downloadResult.href = `data:image/png;base64,${data.processedImage}`;
+                        resultModal.classList.remove('hidden');
+                        document.body.classList.add('overflow-hidden');
+                    } else {
+                        throw new Error('Неверный формат ответа от сервера');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Произошла ошибка при обработке изображения: ' + error.message);
+                })
+                .finally(() => {
+                    submitButton.disabled = false;
+                    loadingIndicator.classList.add('hidden');
+                });
+        });
+
+        // Закрытие модального окна
+        window.closeModal = function () {
+            resultModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        };
+
+        // Закрытие модального окна при клике вне его
+        resultModal.addEventListener('click', function (event) {
+            if (event.target === resultModal) {
+                closeModal();
+            }
+        });
+
+        // Закрытие модального окна при нажатии ESC
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !resultModal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+    });
+</script>

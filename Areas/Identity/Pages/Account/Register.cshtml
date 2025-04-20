@@ -1,0 +1,52 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<style>
+    p, a {
+        color: #aaaaaa;
+    }
+    input{
+        color: #707077;
+    }
+</style>
+
+<h1 class="font-bold text-3xl text-white text-center">Регистрация</h1>
+
+<div class="flex justify-center mt-6">
+    <div class="row w-full max-w-md bg-white shadow-md border rounded-lg p-6" style="border-color:#272729; background:#1e1e1f;">
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-floating">
+                <p class="block font-medium">Почта:</p>
+                <input asp-for="Input.Email" class="w-full border rounded-md px-4 py-2 mt-1" autocomplete="username" aria-required="true" style="background: #2a2a2b; border-color: #303031;" />
+            </div>
+
+            <div class="form-floating">
+                <p class="block font-medium">Пароль:</p>
+                <input asp-for="Input.Password" type="password" class="w-full border rounded-md px-4 py-2 mt-1" autocomplete="new-password" aria-required="true" style="background: #2a2a2b; border-color: #303031;" />
+            </div>
+
+            <div class="form-floating">
+                <p class="block font-medium">Повтор пароля:</p>
+                <input asp-for="Input.ConfirmPassword" type="password" class="w-full border rounded-md px-4 py-2 mt-1" autocomplete="new-password" aria-required="true" style="background: #2a2a2b; border-color: #303031;" />
+            </div>
+
+            <div>
+                <button id="registerSubmit" type="submit" class="text-white py-2 px-8 mt-4 mb-2 rounded-md w-full" style="background:#37373b;">Зарегистрироваться</button>
+            </div>
+            <div>
+                <p>
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="">Уже зарегистрированы? Авторизация</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

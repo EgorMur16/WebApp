@@ -1,0 +1,92 @@
+﻿@page
+@model WebAppAutorization.Pages.ImagineModel
+@{
+    ViewData["Title"] = "Imagine";
+}
+
+<style>
+    p, a, label {
+        color: #aaaaaa;
+    }
+    .text-gray-800, .text-gray-700 {
+        color: #e0e0e0;
+    }
+    .border-gray-200 {
+        border-color: #303031;
+    }
+</style>
+
+<div class="max-w-2xl mx-auto p-6 rounded-lg shadow border" style="background:#1e1e1f; border-color:#272729;">
+    <h2 class="text-2xl font-bold mb-4 text-white">✨Редактор изображений✨</h2>
+
+    @if (!string.IsNullOrEmpty(Model.ProcessedImageBase64))
+    {
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-2" style="color:#e0e0e0;">Результат обработки:</h3>
+            <img src="data:image/png;base64,@Model.ProcessedImageBase64" alt="Сгенерированное изображение"
+                 class="max-w-full max-h-[70vh] rounded shadow" />
+            <a href="data:image/png;base64,@Model.ProcessedImageBase64" download="processed_image.png"
+               class="mt-4 inline-block px-4 py-2 rounded text-white hover:bg-opacity-90"
+               style="background:#37373b;">
+                Скачать результат
+            </a>
+        </div>
+    }
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        <!-- Image Upload -->
+        <div>
+            <label class="block text-sm font-medium mb-1">Изображение:</label>
+            <input type="file" asp-for="ImageFile" accept="image/*" required
+                   class="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0"
+                   style="color:#aaaaaa; background:#2a2a2b; border-color:#303031;
+                          file:bg-#37373b; file:text-white hover:file:bg-opacity-90" />
+        </div>
+
+        <!-- New Prompt -->
+        <div>
+            <label class="block text-sm font-medium mb-1">Изменить:</label>
+            <input asp-for="Text" class="w-full p-2 border rounded" required
+                   placeholder="Что вы хотите увидеть на месте целевого объекта"
+                   style="background:#2a2a2b; border-color:#303031; color:#e0e0e0;" />
+        </div>
+
+        <!-- Search Prompt -->
+        <div>
+            <label class="block text-sm font-medium mb-1">Целевой объект:</label>
+            <input asp-for="SearchPrompt" class="w-full p-2 border rounded" required
+                   placeholder="Что вы хотите изменить, например: bed (кровать), walls (стены)"
+                   style="background:#2a2a2b; border-color:#303031; color:#e0e0e0;" />
+        </div>
+
+        <!-- Output Format -->
+        <div>
+            <label class="block text-sm font-medium mb-1">Формат вывода:</label>
+            <select asp-for="OutputFormat" class="w-full p-2 border rounded" required
+                    style="background:#2a2a2b; border-color:#303031; color:#e0e0e0;">
+                <option value="webp">WEBP</option>
+                <option value="png">PNG</option>
+                <option value="jpeg">JPEG</option>
+            </select>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+                class="w-full px-4 py-2 text-white rounded hover:bg-opacity-90 focus:outline-none"
+                style="background:#37373b;">
+            Обработать
+        </button>
+    </form>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="mt-4" style="color:#ff6b6b;">
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+</div>
